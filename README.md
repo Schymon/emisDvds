@@ -35,11 +35,14 @@ npm run build && npm start
 
 ## Docker
 
+Daten liegen auf dem Host in `/opt/emisDvds` (Bind-Mount nach `/app/src/data`), Container erreichbar über Port **3020**.
+
 ```bash
+mkdir -p /opt/emisDvds
 TMDB_API_KEY=dein_key docker compose up -d --build
 ```
 
-App: http://localhost:3004
+App: http://localhost:3020
 
 ## API Endpoints
 
