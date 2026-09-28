@@ -35,12 +35,28 @@ npm run build && npm start
 
 ## Docker
 
-Daten liegen auf dem Host in `/opt/emisDvds` (Bind-Mount nach `/app/src/data`), Container erreichbar über Port **3020**.
+### Lokal bauen und testen (Port 3020)
+
+```bash
+docker compose -f docker-compose.local.yml up -d --build
+```
+
+### Bauen und zu Docker Hub pushen
+
+```bash
+docker build -t schymon/emisdvds:latest . && docker push schymon/emisdvds:latest
+```
+
+### Homeserver (Coolify / docker compose)
+
+Die `docker-compose.yml` nutzt das Image `schymon/emisdvds:latest`:
 
 ```bash
 mkdir -p /opt/emisDvds
-TMDB_API_KEY=dein_key docker compose up -d --build
+docker compose pull && docker compose up -d
 ```
+
+Daten (Filme) liegen auf dem Host in `/opt/emisDvds`. `TMDB_API_KEY` in der Compose-Datei durch den echten Key ersetzen.
 
 App: http://localhost:3020
 
