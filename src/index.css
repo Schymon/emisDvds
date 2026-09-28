@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --drawably-ink: #2b2b2b;
+  --drawably-paper: #fdfbf5;
+  --drawably-error: #c0392b;
+  --drawably-success: #27ae60;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  background-color: var(--drawably-paper);
+  background-image: radial-gradient(#e8e2d4 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--drawably-ink);
+}
+
+#root {
+  min-height: 100vh;
+}

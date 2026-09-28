@@ -1,0 +1,20 @@
+services:
+  emis-dvds:
+    build: .
+    container_name: emis-dvds
+    ports:
+      - "3004:3004"
+    volumes:
+      - emis-dvds-data:/app/src/data
+    restart: unless-stopped
+    environment:
+      - 'TMDB_API_KEY=${TMDB_API_KEY}'
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  emis-dvds-data:
