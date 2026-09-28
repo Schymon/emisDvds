@@ -8,7 +8,7 @@ services:
       - '/opt/emisDvds:/app/src/data'
     restart: unless-stopped
     environment:
-      - 'TMDB_API_KEY=your-tmdb-api-key'
+      - 'TMDB_API_KEY=${TMDB_API_KEY}'
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3004/health"]
       interval: 30s
