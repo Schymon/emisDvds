@@ -9,6 +9,11 @@
   --drawably-success: #27ae60;
 }
 
+.fab-pastel {
+  --drawably-ink: #f0938a;
+  --drawably-paper: #ffffff;
+}
+
 * {
   margin: 0;
   padding: 0;

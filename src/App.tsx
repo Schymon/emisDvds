@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Disc, LayoutGrid, List } from 'lucide-react'
-import { DrawablyButton } from 'drawably/react'
+import { LayoutGrid, List } from 'lucide-react'
+import { DrawablyButton, DrawablySelect } from 'drawably/react'
 import type { ReactElement } from 'react'
 import type { Dvd, TmdbSearchResult } from '@/types'
 import { fetchDvds, createDvd, updateRating, deleteDvd } from '@/lib/api'
@@ -11,6 +11,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { FabButton } from '@/components/FabButton'
 
 type View = 'grid' | 'list'
+type Sort = 'newest' | 'rating' | 'alpha'
 
 export default function App(): ReactElement {
   const [dvds, setDvds] = useState<Dvd[]>([])
@@ -18,6 +19,10 @@ export default function App(): ReactElement {
   const [view, setView] = useState<View>(() =>
     localStorage.getItem('dvds-view') === 'list' ? 'list' : 'grid',
   )
+  const [sort, setSort] = useState<Sort>(() => {
+    const stored = localStorage.getItem('dvds-sort')
+    return stored === 'rating' || stored === 'alpha' ? stored : 'newest'
+  })
   const [createOpen, setCreateOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Dvd | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -31,6 +36,19 @@ export default function App(): ReactElement {
   useEffect(() => {
     localStorage.setItem('dvds-view', view)
   }, [view])
+
+  useEffect(() => {
+    localStorage.setItem('dvds-sort', sort)
+  }, [sort])
+
+  const sortedDvds = useMemo(() => {
+    const copy = [...dvds]
+    if (sort === 'newest') copy.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    if (sort === 'rating')
+      copy.sort((a, b) => b.rating - a.rating || a.title.localeCompare(b.title, 'de'))
+    if (sort === 'alpha') copy.sort((a, b) => a.title.localeCompare(b.title, 'de'))
+    return copy
+  }, [dvds, sort])
 
   const existingTmdbIds = useMemo(() => new Set(dvds.map((d) => d.tmdbId)), [dvds])
 
@@ -65,16 +83,21 @@ export default function App(): ReactElement {
 
   return (
     <div className="mx-auto max-w-6xl px-3 pb-28 pt-5 sm:px-4 sm:pt-8">
-      <header className="mb-6 flex items-center justify-between gap-3 sm:mb-8">
-        <div className="flex min-w-0 items-center gap-3">
-          <Disc size={28} className="shrink-0 text-neutral-800 sm:size-8" />
-          <div className="min-w-0">
-            <h1 className="truncate text-2xl font-bold tracking-tight sm:text-3xl">Emis DVDs</h1>
-            <p className="text-xs text-neutral-500 sm:text-sm">Meine DVD-Sammlung zu Hause</p>
-          </div>
-        </div>
-        <div className="flex shrink-0 gap-2">
+      <header className="mb-6 sm:mb-8">
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Emi's DvD Sammlung</h1>
+        <div className="mt-3 flex items-center justify-end gap-2">
+          <DrawablySelect
+            aria-label="Sortierung"
+            value={sort}
+            onChange={(e) => setSort(e.target.value as Sort)}
+            className="!text-xs sm:!text-sm"
+          >
+            <option value="newest">Zuletzt hinzugefügt</option>
+            <option value="rating">Bewertung</option>
+            <option value="alpha">Alphabetisch</option>
+          </DrawablySelect>
           <DrawablyButton
+            key={`grid-${view}`}
             variant={view === 'grid' ? 'solid' : 'outline'}
             onClick={() => setView('grid')}
             aria-label="Kartenansicht"
@@ -83,6 +106,7 @@ export default function App(): ReactElement {
             <LayoutGrid size={16} />
           </DrawablyButton>
           <DrawablyButton
+            key={`list-${view}`}
             variant={view === 'list' ? 'solid' : 'outline'}
             onClick={() => setView('list')}
             aria-label="Listenansicht"
@@ -100,7 +124,7 @@ export default function App(): ReactElement {
       )}
 
       {view === 'grid' ? (
-        <DvdGrid dvds={dvds} onRate={handleRate} onDelete={setDeleteTarget} />
+        <DvdGrid dvds={sortedDvds} onRate={handleRate} onDelete={setDeleteTarget} />
       ) : dvds.length === 0 ? (
         <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
           <p className="text-xl font-semibold sm:text-2xl">Noch keine DVDs in deiner Sammlung</p>
@@ -109,7 +133,7 @@ export default function App(): ReactElement {
           </p>
         </div>
       ) : (
-        <DvdList dvds={dvds} onRate={handleRate} onDelete={setDeleteTarget} />
+        <DvdList dvds={sortedDvds} onRate={handleRate} onDelete={setDeleteTarget} />
       )}
 
       <FabButton onClick={() => setCreateOpen(true)} />

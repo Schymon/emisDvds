@@ -7,7 +7,7 @@
     "year": "2011",
     "posterPath": "/4vrMkJsORsxZYUSN1V0DIycIBV5.jpg",
     "overview": "Kurz vor seiner Hochzeit erfährt der junge Arzt Danny Maccabee, dass ihn seine Braut schon mehrmals betrogen hat und ihn nur wegen seiner aussichtsreichen Karriere heiraten will - die Hochzeit platzt. Als sich Danny später in einer Bar betrinken will und dabei seinen Ehering am Finger angesteckt hat, merkt er, dass er mit diesem Ring leichter das Vertrauen von Frauen erwerben kann. In den folgenden Jahren wird genau dies seine Masche: Er spielt den unglücklich verliebten Ehemann, der Trösterinnen findet – für genau eine Nacht. Mehr will er auch gar nicht, da er so nicht von einer Frau enttäuscht werden kann.",
-    "rating": 2,
+    "rating": 0,
     "createdAt": "2026-09-28T17:08:36.855Z"
   },
   {
@@ -20,5 +20,27 @@
     "overview": "Der junge Jedi-Schüler Anakin Skywalker beginnt sich allmählich zu einem grossen und ernstzunehmenden Jediritter zu entwickeln, der unter der Führung von Obi Wan-Kenobi steht. Jedoch hat er auch seine Problemzonen - diese bestehen aus der eigenen Arroganz, seiner nicht wissentlich vorhandenen grenzenlosen Macht, und der ihm verbotenen Liebe zu Königin Amidala. Auf diese werden kurz vor wichtigen Entscheidungen im Senat der Republik mehrere Attentate verübt, die jedoch vereitelt werden können. Daraufhin teilen sich Anakin und Obi-Wan auf: während Anakin auf Amidala aufpaßt, verfolgt Kenobi den Attentäter Jango Fett. Er kommt einer erschaffenen Klon-Armee auf die Spur, die mittels mysteriösem Auftrag geschaffen wurde und findet in dem ehemaligen Jedi Count Dooku einen neuen Gegner für die Hüter der Macht...",
     "rating": 0,
     "createdAt": "2026-09-28T17:10:05.606Z"
+  },
+  {
+    "id": "1b208d61-5b37-4d09-bdf1-658bd426c4a6",
+    "tmdbId": 49051,
+    "title": "Der Hobbit - Eine unerwartete Reise",
+    "originalTitle": "The Hobbit: An Unexpected Journey",
+    "year": "2012",
+    "posterPath": "/bPYCAzOB3M3PZ91BpQzJeReKkP8.jpg",
+    "overview": "Mit dem Besuch des weisen Zauberers Gandalf verändert sich das beschauliche Leben eines Hobbits für immer. Zögerlich schließt sich der unbedarfte Bilbo mit Gandalf der Mission von 13 mutigen Zwergen an, die ihr Reich zurückerobern wollen. Der furchterregende Drache Smaug, der es einst zerstörte, ist seit Jahrzehnten verschwunden. Doch ist das Monstrum wirklich tot und können die großen Gefahren dieses Abenteuers, darunter gefräßige Orks und wütende Trolle, wirklich von so kleinen Helden überwunden werden?",
+    "rating": 0,
+    "createdAt": "2026-09-28T17:22:27.246Z"
+  },
+  {
+    "id": "607e4174-25dc-4ea5-995d-373d5cfd30df",
+    "tmdbId": 57158,
+    "title": "Der Hobbit - Smaugs Einöde",
+    "originalTitle": "The Hobbit: The Desolation of Smaug",
+    "year": "2013",
+    "posterPath": "/60O2sdzZcPX8vXyDOYHi7exrnil.jpg",
+    "overview": "Die Gefährten haben den Beginn ihrer unerwarteten Reise überstanden – auf ihrem Weg gen Osten begegnen sie nun dem Hautwechsler Beorn und im trügerischen Düsterwald einem Schwarm gigantischer Spinnen. Sie werden von den gefährlichen Waldelben gefangen genommen, können aber entkommen, erreichen Seestadt und schließlich den Einsamen Berg selbst, wo sie sich der größten Gefahr stellen müssen – einem Monster, das alle bisherigen an Grässlichkeit übertrifft: Der Drache Smaug fordert nicht nur den ganzen Mut der Gefährten heraus, sondern stellt auch ihre Freundschaft auf eine harte Probe – bis sie sich schließlich fragen müssen, ob ihre Reise überhaupt noch einen Sinn ergibt.",
+    "rating": 0,
+    "createdAt": "2026-09-28T17:22:41.231Z"
   }
 ]

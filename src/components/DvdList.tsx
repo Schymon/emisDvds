@@ -1,5 +1,5 @@
 import { Film, Trash2 } from 'lucide-react'
-import { DrawablyButton, DrawablyCard } from 'drawably/react'
+import { DrawablyCard } from 'drawably/react'
 import type { ReactElement } from 'react'
 import type { Dvd } from '@/types'
 import { posterUrl } from '@/lib/api'
@@ -34,15 +34,14 @@ export function DvdList({ dvds, onRate, onDelete }: DvdListProps): ReactElement 
                 <StarRating rating={dvd.rating} onChange={(rating) => onRate(dvd.id, rating)} size={14} />
               </span>
             </span>
-            <DrawablyButton
-              variant="outline"
-              tone="danger"
+            <button
+              type="button"
               aria-label={`${dvd.title} löschen`}
               onClick={() => onDelete(dvd)}
-              className="shrink-0 cursor-pointer !px-2 !py-0.5"
+              className="shrink-0 cursor-pointer border-0 bg-transparent p-1 text-neutral-500 hover:text-red-600"
             >
               <Trash2 size={14} />
-            </DrawablyButton>
+            </button>
           </DrawablyCard>
         )
       })}
