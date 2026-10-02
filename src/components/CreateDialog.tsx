@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Film, Loader2, Tv } from 'lucide-react'
+import { Film, Heart, Loader2, Tv } from 'lucide-react'
 import { DrawablyButton, DrawablyDivider, DrawablyInput } from 'drawably/react'
 import type { ReactElement } from 'react'
 import type { MediaType, TmdbSearchResult } from '@/types'
-import { searchTmdb, lookupUpc, posterUrl } from '@/lib/api'
+import { searchTmdb, lookupUpc, posterUrl, createWish } from '@/lib/api'
 import { Modal } from './Modal'
 import { BarcodeScanner } from './BarcodeScanner'
 
@@ -20,6 +20,7 @@ export function CreateDialog({ existingTmdbIds, onClose, onCreate }: CreateDialo
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [savingId, setSavingId] = useState<number | null>(null)
+  const [wishSaving, setWishSaving] = useState<number | null>(null)
   const [ean, setEan] = useState<string | null>(null)
   const [scanMsg, setScanMsg] = useState<string | null>(null)
 
@@ -110,6 +111,30 @@ export function CreateDialog({ existingTmdbIds, onClose, onCreate }: CreateDialo
     }
   }
 
+  const handleWish = async (result: TmdbSearchResult) => {
+    setWishSaving(result.tmdbId)
+    setError(null)
+    try {
+      await createWish({
+        tmdbId: result.tmdbId,
+        mediaType: result.mediaType,
+        title: result.title,
+        originalTitle: result.originalTitle,
+        year: result.year,
+        posterPath: result.posterPath,
+        overview: result.overview,
+      })
+      setQuery('')
+      setResults([])
+      setEan(null)
+      setScanMsg(`„${result.title}“ zur Wunschliste hinzugefügt`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Hinzufügen zur Wunschliste fehlgeschlagen')
+    } finally {
+      setWishSaving(null)
+    }
+  }
+
   return (
     <Modal title="Neue DVD oder Serie hinzufügen" onClose={onClose}>
       <BarcodeScanner onDetected={handleDetected} onError={(msg) => setError(msg)} />
@@ -185,34 +210,50 @@ export function CreateDialog({ existingTmdbIds, onClose, onCreate }: CreateDialo
               const alreadyIn = existingTmdbIds.has(`${result.mediaType}:${result.tmdbId}`)
               return (
                 <li key={`${result.mediaType}:${result.tmdbId}`}>
-                  <button
-                    type="button"
-                    disabled={alreadyIn || savingId !== null}
-                    onClick={() => handleSelect(result)}
-                    className="flex w-full cursor-pointer items-center gap-3 rounded-md border border-neutral-300 bg-white/70 p-2 text-left transition hover:border-neutral-800 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    <span className="flex h-20 w-14 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-neutral-100">
-                      {poster ? (
-                        <img src={poster} alt="" className="h-full w-full object-cover" />
-                      ) : result.mediaType === 'tv' ? (
-                        <Tv size={20} className="text-neutral-300" />
-                      ) : (
-                        <Film size={20} className="text-neutral-300" />
-                      )}
-                    </span>
+                  <div className="flex items-stretch gap-1">
+                    <button
+                      type="button"
+                      disabled={alreadyIn || savingId !== null}
+                      onClick={() => handleSelect(result)}
+                      className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-md border border-neutral-300 bg-white/70 p-2 text-left transition hover:border-neutral-800 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <span className="flex h-20 w-14 shrink-0 items-center justify-center overflow-hidden rounded-sm bg-neutral-100">
+                        {poster ? (
+                          <img src={poster} alt="" className="h-full w-full object-cover" />
+                        ) : result.mediaType === 'tv' ? (
+                          <Tv size={20} className="text-neutral-300" />
+                        ) : (
+                          <Film size={20} className="text-neutral-300" />
+                        )}
+                      </span>
                       <span className="min-w-0">
                         <span className="block break-words text-sm font-semibold">{result.title}</span>
-                      <span className="block text-xs text-neutral-500">
-                        {result.year} &middot; {result.originalTitle}
+                        <span className="block text-xs text-neutral-500">
+                          {result.year} &middot; {result.originalTitle}
+                        </span>
+                        {alreadyIn && (
+                          <span className="mt-1 block text-xs text-amber-600">Bereits in der Sammlung</span>
+                        )}
                       </span>
-                      {alreadyIn && (
-                        <span className="mt-1 block text-xs text-amber-600">Bereits in der Sammlung</span>
+                      {savingId === result.tmdbId && (
+                        <Loader2 size={16} className="ml-auto animate-spin" />
                       )}
-                    </span>
-                    {savingId === result.tmdbId && (
-                      <Loader2 size={16} className="ml-auto animate-spin" />
-                    )}
-                  </button>
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`${result.title} zur Wunschliste hinzufügen`}
+                      title="Zur Wunschliste"
+                      disabled={wishSaving !== null}
+                      onClick={() => handleWish(result)}
+                      className="flex w-9 shrink-0 cursor-pointer items-center justify-center self-center rounded-md border-0 bg-transparent text-neutral-400 transition hover:scale-110 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {wishSaving === result.tmdbId ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        <Heart size={18} />
+                      )}
+                    </button>
+                  </div>
                 </li>
               )
             })}

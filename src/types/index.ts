@@ -23,3 +23,15 @@ export interface TmdbSearchResult {
   posterPath: string | null
   overview: string
 }
+
+export interface WishItem {
+  id: string
+  tmdbId: number
+  mediaType: MediaType
+  title: string
+  originalTitle?: string
+  year?: string
+  posterPath?: string | null
+  overview?: string
+  createdAt: string
+}

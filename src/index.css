@@ -24,6 +24,16 @@
   --drawably-paper: #1f4d2e;
 }
 
+.btn-pastel-green {
+  --drawably-ink: #a9e0b6;
+  --drawably-paper: #1f4d2e;
+}
+
+.btn-pastel-red {
+  --drawably-ink: #f2a6a6;
+  --drawably-paper: #5f1f1f;
+}
+
 * {
   margin: 0;
   padding: 0;

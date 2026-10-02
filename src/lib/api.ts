@@ -1,4 +1,4 @@
-import type { Dvd, MediaType, TmdbSearchResult } from '@/types'
+import type { Dvd, MediaType, TmdbSearchResult, WishItem } from '@/types'
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, options)
@@ -48,6 +48,24 @@ export async function lookupUpc(code: string): Promise<string | null> {
     `/api/upc/lookup?code=${encodeURIComponent(code)}`,
   )
   return data.title
+}
+
+export function fetchWishlist(): Promise<WishItem[]> {
+  return request<WishItem[]>('/api/wishlist')
+}
+
+export function createWish(
+  data: Omit<WishItem, 'id' | 'createdAt'>,
+): Promise<WishItem> {
+  return request<WishItem>('/api/wishlist', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+}
+
+export function deleteWish(id: string): Promise<{ ok: boolean }> {
+  return request<{ ok: boolean }>(`/api/wishlist/${id}`, { method: 'DELETE' })
 }
 
 export function posterUrl(posterPath: string | null | undefined, size = 'w342'): string | null {

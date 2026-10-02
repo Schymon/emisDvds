@@ -1,19 +1,26 @@
 import { useEffect, useMemo, useState } from 'react'
-import { LayoutGrid, List } from 'lucide-react'
+import { Heart, LayoutGrid, List } from 'lucide-react'
 import { DrawablyButton, DrawablyInput, DrawablySelect } from 'drawably/react'
 import type { ReactElement } from 'react'
 import type { Dvd, TmdbSearchResult } from '@/types'
-import { fetchDvds, createDvd, updateRating, deleteDvd } from '@/lib/api'
+import { fetchDvds, createDvd, updateRating, deleteDvd, fetchWishlist } from '@/lib/api'
 import { DvdGrid } from '@/components/DvdGrid'
 import { DvdList } from '@/components/DvdList'
 import { CreateDialog } from '@/components/CreateDialog'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { FabButton } from '@/components/FabButton'
+import { WishlistPage } from '@/components/WishlistPage'
 
 type View = 'grid' | 'list'
 type Sort = 'newest' | 'rating' | 'alpha'
 
+function normalizePath(pathname: string): string {
+  const clean = pathname.replace(/\/+$/, '')
+  return clean === '' ? '/' : clean
+}
+
 export default function App(): ReactElement {
+  const [route, setRoute] = useState(() => normalizePath(window.location.pathname))
   const [dvds, setDvds] = useState<Dvd[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
   const [view, setView] = useState<View>(() =>
@@ -24,15 +31,31 @@ export default function App(): ReactElement {
     return stored === 'rating' || stored === 'alpha' ? stored : 'newest'
   })
   const [createOpen, setCreateOpen] = useState(false)
-  const [search, setSearch] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<Dvd | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [search, setSearch] = useState('')
+  const [wishCount, setWishCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    const onPop = () => setRoute(normalizePath(window.location.pathname))
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  const navigate = (path: string) => {
+    window.history.pushState({}, '', path)
+    setRoute(normalizePath(path))
+    window.scrollTo(0, 0)
+  }
 
   useEffect(() => {
     fetchDvds()
       .then(setDvds)
       .catch((err) => setLoadError(err?.message || 'Sammlung konnte nicht geladen werden'))
-  }, [])
+    fetchWishlist()
+      .then((w) => setWishCount(w.length))
+      .catch(() => undefined)
+  }, [route])
 
   useEffect(() => {
     localStorage.setItem('dvds-view', view)
@@ -93,6 +116,25 @@ export default function App(): ReactElement {
     } finally {
       setDeleting(false)
     }
+  }
+
+  if (route === '/wunschliste') {
+    return (
+      <div className="mx-auto max-w-6xl px-3 pb-28 pt-5 sm:px-4 sm:pt-8">
+        <WishlistPage onCountChange={setWishCount} />
+        <div className="fixed bottom-5 right-5 z-40 sm:bottom-6 sm:right-6">
+          <DrawablyButton
+            variant="solid"
+            onClick={() => navigate('/')}
+            className="btn-pastel-green flex cursor-pointer items-center gap-2 !rounded-full !px-4 !py-2.5 text-sm font-semibold sm:!px-5 sm:!py-3 sm:text-base"
+            aria-label="Zurück zur Sammlung"
+          >
+            <LayoutGrid size={20} />
+            Zur Sammlung
+          </DrawablyButton>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -162,7 +204,23 @@ export default function App(): ReactElement {
         <DvdList dvds={visibleDvds} onRate={handleRate} onDelete={setDeleteTarget} />
       )}
 
-      <FabButton onClick={() => setCreateOpen(true)} />
+      <div className="fixed bottom-5 right-5 z-40 flex items-center gap-2 sm:bottom-6 sm:right-6">
+        <DrawablyButton
+          variant="solid"
+          onClick={() => navigate('/wunschliste')}
+          className="btn-pastel-green flex cursor-pointer items-center gap-2 !rounded-full !px-4 !py-2.5 text-sm font-semibold sm:!px-5 sm:!py-3 sm:text-base"
+          aria-label="Zur Wunschliste"
+        >
+          <Heart size={20} />
+          Wunschliste
+          {wishCount !== null && wishCount > 0 && (
+            <span className="rounded-full bg-white/80 px-1.5 text-[10px] font-bold text-neutral-700">
+              {wishCount}
+            </span>
+          )}
+        </DrawablyButton>
+        <FabButton onClick={() => setCreateOpen(true)} />
+      </div>
 
       {createOpen && (
         <CreateDialog

@@ -10,6 +10,7 @@ const PORT = Number(process.env.PORT) || 3004
 const TMDB_API_KEY = process.env.TMDB_API_KEY || ''
 const DATA_DIR = path.join(__dirname, '..', 'src', 'data')
 const DVDS_FILE = path.join(DATA_DIR, 'dvds.json')
+const WISHLIST_FILE = path.join(DATA_DIR, 'wishlist.json')
 const TMDB_BASE = 'https://api.themoviedb.org/3'
 
 app.use(cors())
@@ -34,11 +35,40 @@ interface Dvd {
   createdAt: string
 }
 
+interface WishItem {
+  id: string
+  tmdbId: number
+  mediaType: 'movie' | 'tv'
+  title: string
+  originalTitle?: string
+  year?: string
+  posterPath?: string | null
+  overview?: string
+  createdAt: string
+}
+
 function ensureDataDir() {
   fs.ensureDirSync(DATA_DIR)
   if (!fs.existsSync(DVDS_FILE)) {
     fs.writeJsonSync(DVDS_FILE, [], { spaces: 2 })
   }
+  if (!fs.existsSync(WISHLIST_FILE)) {
+    fs.writeJsonSync(WISHLIST_FILE, [], { spaces: 2 })
+  }
+}
+
+function getWishlist(): WishItem[] {
+  ensureDataDir()
+  try {
+    return fs.readJsonSync(WISHLIST_FILE)
+  } catch {
+    return []
+  }
+}
+
+function saveWishlist(items: WishItem[]) {
+  ensureDataDir()
+  fs.writeJsonSync(WISHLIST_FILE, items, { spaces: 2 })
 }
 
 function getDvds(): Dvd[] {
@@ -122,6 +152,54 @@ app.delete('/api/dvds/:id', (req, res) => {
     return
   }
   saveDvds(next)
+  res.json({ ok: true })
+})
+
+app.get('/api/wishlist', (_req, res) => {
+  res.json(getWishlist())
+})
+
+app.post('/api/wishlist', (req, res) => {
+  const { tmdbId, title, originalTitle, year, posterPath, overview } = req.body || {}
+  const mediaType: 'movie' | 'tv' = req.body?.mediaType === 'tv' ? 'tv' : 'movie'
+  if (!title || tmdbId == null) {
+    res.status(400).json({ error: 'title und tmdbId sind erforderlich' })
+    return
+  }
+  const dvds = getDvds()
+  if (dvds.some((d) => d.tmdbId === tmdbId && (d.mediaType || 'movie') === mediaType)) {
+    res.status(409).json({ error: 'Eintrag ist bereits in der Sammlung' })
+    return
+  }
+  const wishlist = getWishlist()
+  if (wishlist.some((w) => w.tmdbId === tmdbId && w.mediaType === mediaType)) {
+    res.status(409).json({ error: 'Eintrag ist bereits auf der Wunschliste' })
+    return
+  }
+  const item: WishItem = {
+    id: crypto.randomUUID(),
+    tmdbId,
+    mediaType,
+    title,
+    originalTitle,
+    year,
+    posterPath: posterPath ?? null,
+    overview: overview ?? '',
+    createdAt: new Date().toISOString(),
+  }
+  wishlist.push(item)
+  saveWishlist(wishlist)
+  res.status(201).json(item)
+})
+
+app.delete('/api/wishlist/:id', (req, res) => {
+  const wishlist = getWishlist()
+  const next = wishlist.filter((w) => w.id !== req.params.id)
+  if (next.length === wishlist.length) {
+    res.status(404).json({ error: 'Eintrag nicht gefunden' })
+    return
+  }
+  saveWishlist(next)
   res.json({ ok: true })
 })
 
@@ -220,6 +298,15 @@ app.get('/api/tmdb/search', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : 'Unbekannter Fehler bei der TMDB-Suche' })
   }
+})
+
+app.get(/^\/(?!api\/|health).*/, (req, res, next) => {
+  const indexFile = path.join(DIST_DIR, 'index.html')
+  if (req.method !== 'GET' || !fs.existsSync(indexFile)) {
+    next()
+    return
+  }
+  res.sendFile(indexFile)
 })
 
 app.listen(PORT, () => {
