@@ -40,6 +40,13 @@ export async function searchTmdb(query: string): Promise<TmdbSearchResult[]> {
   return data.results
 }
 
+export async function lookupUpc(code: string): Promise<string | null> {
+  const data = await request<{ title: string | null }>(
+    `/api/upc/lookup?code=${encodeURIComponent(code)}`,
+  )
+  return data.title
+}
+
 export function posterUrl(posterPath: string | null | undefined, size = 'w342'): string | null {
   if (!posterPath) return null
   return `https://image.tmdb.org/t/p/${size}${posterPath}`
