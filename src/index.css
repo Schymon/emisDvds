@@ -14,6 +14,16 @@
   --drawably-paper: #ffffff;
 }
 
+.type-movie-active {
+  --drawably-ink: #a9c9ef;
+  --drawably-paper: #1f3a5f;
+}
+
+.type-tv-active {
+  --drawably-ink: #a9e0b6;
+  --drawably-paper: #1f4d2e;
+}
+
 * {
   margin: 0;
   padding: 0;

@@ -125,7 +125,6 @@ export function BarcodeScanner({ onDetected, onError }: BarcodeScannerProps): Re
           {scanning ? <CameraOff size={16} /> : <ScanLine size={16} />}
           {scanning ? 'Kamera stoppen' : 'Barcode scannen'}
         </DrawablyButton>
-        <span className="text-xs text-neutral-500">EAN/UPC vom DVD-Cover in die Kamera halten</span>
       </div>
     </div>
   )

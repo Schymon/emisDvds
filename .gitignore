@@ -22,3 +22,6 @@ npm-debug.log*
 .DS_Store
 
 # Data is persisted in src/data/dvds.json
+
+#ci/cd
+JENKINS-PIPELINE-BUILD

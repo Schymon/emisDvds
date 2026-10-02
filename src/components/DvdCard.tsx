@@ -1,4 +1,4 @@
-import { Trash2, Film } from 'lucide-react'
+import { Trash2, Film, Tv } from 'lucide-react'
 import { DrawablyCard } from 'drawably/react'
 import type { ReactElement } from 'react'
 import type { Dvd } from '@/types'
@@ -13,16 +13,23 @@ interface DvdCardProps {
 
 export function DvdCard({ dvd, onRate, onDelete }: DvdCardProps): ReactElement {
   const poster = posterUrl(dvd.posterPath)
+  const isSeries = dvd.mediaType === 'tv'
   return (
     <DrawablyCard className="flex flex-col p-2 sm:p-3">
-      <div className="flex aspect-[2/3] items-center justify-center overflow-hidden rounded-sm bg-neutral-100">
+      <div className="relative flex aspect-[2/3] items-center justify-center overflow-hidden rounded-sm bg-neutral-100">
         {poster ? (
           <img src={poster} alt={dvd.title} className="h-full w-full object-cover" loading="lazy" />
         ) : (
           <Film size={32} className="text-neutral-300" />
         )}
+        {isSeries && (
+          <span className="absolute left-1 top-1 flex items-center gap-1 rounded-sm bg-neutral-900/75 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white sm:text-[10px]">
+            <Tv size={10} />
+            Serie
+          </span>
+        )}
       </div>
-      <h3 className="mt-2 line-clamp-2 text-[11px] font-semibold leading-snug sm:text-sm">
+      <h3 className="mt-2 break-words text-[11px] font-semibold leading-snug sm:text-sm">
         {dvd.title}
       </h3>
       {dvd.year ? (

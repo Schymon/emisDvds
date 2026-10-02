@@ -23,6 +23,7 @@ if (fs.existsSync(DIST_DIR)) {
 interface Dvd {
   id: string
   tmdbId: number
+  mediaType?: 'movie' | 'tv'
   ean?: string | null
   title: string
   originalTitle?: string
@@ -64,13 +65,14 @@ app.get('/api/dvds', (_req, res) => {
 
 app.post('/api/dvds', (req, res) => {
   const { tmdbId, title, originalTitle, year, posterPath, overview, ean } = req.body || {}
+  const mediaType: 'movie' | 'tv' = req.body?.mediaType === 'tv' ? 'tv' : 'movie'
   if (!title || tmdbId == null) {
     res.status(400).json({ error: 'title und tmdbId sind erforderlich' })
     return
   }
   const dvds = getDvds()
-  if (dvds.some((d) => d.tmdbId === tmdbId)) {
-    res.status(409).json({ error: 'Film ist bereits in der Sammlung' })
+  if (dvds.some((d) => d.tmdbId === tmdbId && (d.mediaType || 'movie') === mediaType)) {
+    res.status(409).json({ error: 'Eintrag ist bereits in der Sammlung' })
     return
   }
   if (ean && dvds.some((d) => d.ean === ean)) {
@@ -80,6 +82,7 @@ app.post('/api/dvds', (req, res) => {
   const dvd: Dvd = {
     id: crypto.randomUUID(),
     tmdbId,
+    mediaType,
     ean: ean ? String(ean) : null,
     title,
     originalTitle,
@@ -159,6 +162,9 @@ app.get('/api/upc/lookup', async (req, res) => {
 
 app.get('/api/tmdb/search', async (req, res) => {
   const query = String(req.query.q || '').trim()
+  const typeParam = String(req.query.type || 'movie')
+  const type: 'movie' | 'tv' | 'all' =
+    typeParam === 'tv' ? 'tv' : typeParam === 'all' ? 'all' : 'movie'
   if (!query) {
     res.json({ results: [] })
     return
@@ -169,29 +175,45 @@ app.get('/api/tmdb/search', async (req, res) => {
   }
   try {
     const isBearerToken = TMDB_API_KEY.startsWith('eyJ')
-    const url = `${TMDB_BASE}/search/movie?language=de-DE&query=${encodeURIComponent(query)}&include_adult=false${isBearerToken ? '' : `&api_key=${TMDB_API_KEY}`}`
-    const response = await fetch(url, {
-      headers: isBearerToken ? { Authorization: `Bearer ${TMDB_API_KEY}` } : {},
-    })
-    if (!response.ok) {
-      res.status(502).json({ error: `TMDB-Antwort fehlgeschlagen (${response.status})` })
-      return
-    }
-    const data = await response.json()
-    interface TmdbMovie {
+    interface TmdbEntry {
       id: number
-      title: string
-      original_title: string
+      title?: string
+      name?: string
+      original_title?: string
+      original_name?: string
       release_date?: string
+      first_air_date?: string
       poster_path?: string | null
       overview?: string
+      popularity?: number
     }
-    const results = ((data.results || []) as TmdbMovie[]).slice(0, 20).map((m) => ({
+    const fetchTmdb = async (endpoint: 'search/movie' | 'search/tv'): Promise<TmdbEntry[]> => {
+      const url = `${TMDB_BASE}/${endpoint}?language=de-DE&query=${encodeURIComponent(query)}&include_adult=false${isBearerToken ? '' : `&api_key=${TMDB_API_KEY}`}`
+      const response = await fetch(url, {
+        headers: isBearerToken ? { Authorization: `Bearer ${TMDB_API_KEY}` } : {},
+      })
+      if (!response.ok) {
+        throw new Error(`TMDB-Antwort fehlgeschlagen (${response.status})`)
+      }
+      const data = await response.json()
+      return (data.results || []) as TmdbEntry[]
+    }
+    const endpoints: Array<'search/movie' | 'search/tv'> =
+      type === 'all' ? ['search/movie', 'search/tv'] : type === 'tv' ? ['search/tv'] : ['search/movie']
+    const lists = await Promise.all(endpoints.map(fetchTmdb))
+    const raw: Array<TmdbEntry & { kind: 'movie' | 'tv' }> = lists
+      .map((list, i) => list.map((m) => ({ ...m, kind: endpoints[i] === 'search/tv' ? 'tv' as const : 'movie' as const })))
+      .flat()
+    if (type === 'all') {
+      raw.sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0))
+    }
+    const results = raw.slice(0, 20).map((m) => ({
       tmdbId: m.id,
-      title: m.title,
-      originalTitle: m.original_title,
-      year: m.release_date ? String(m.release_date).slice(0, 4) : '',
-      posterPath: m.poster_path,
+      mediaType: m.kind,
+      title: m.title || m.name || '',
+      originalTitle: m.original_title || m.original_name || '',
+      year: String(m.release_date || m.first_air_date || '').slice(0, 4),
+      posterPath: m.poster_path ?? null,
       overview: m.overview || '',
     }))
     res.json({ results })

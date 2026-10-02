@@ -1,4 +1,4 @@
-import type { Dvd, TmdbSearchResult } from '@/types'
+import type { Dvd, MediaType, TmdbSearchResult } from '@/types'
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, options)
@@ -33,9 +33,12 @@ export function deleteDvd(id: string): Promise<{ ok: boolean }> {
   return request<{ ok: boolean }>(`/api/dvds/${id}`, { method: 'DELETE' })
 }
 
-export async function searchTmdb(query: string): Promise<TmdbSearchResult[]> {
+export async function searchTmdb(
+  query: string,
+  mediaType: MediaType | 'all' = 'all',
+): Promise<TmdbSearchResult[]> {
   const data = await request<{ results: TmdbSearchResult[] }>(
-    `/api/tmdb/search?q=${encodeURIComponent(query)}`,
+    `/api/tmdb/search?q=${encodeURIComponent(query)}&type=${mediaType}`,
   )
   return data.results
 }

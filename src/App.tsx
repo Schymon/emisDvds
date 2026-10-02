@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { LayoutGrid, List } from 'lucide-react'
-import { DrawablyButton, DrawablySelect } from 'drawably/react'
+import { DrawablyButton, DrawablyInput, DrawablySelect } from 'drawably/react'
 import type { ReactElement } from 'react'
 import type { Dvd, TmdbSearchResult } from '@/types'
 import { fetchDvds, createDvd, updateRating, deleteDvd } from '@/lib/api'
@@ -24,6 +24,7 @@ export default function App(): ReactElement {
     return stored === 'rating' || stored === 'alpha' ? stored : 'newest'
   })
   const [createOpen, setCreateOpen] = useState(false)
+  const [search, setSearch] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<Dvd | null>(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -50,7 +51,20 @@ export default function App(): ReactElement {
     return copy
   }, [dvds, sort])
 
-  const existingTmdbIds = useMemo(() => new Set(dvds.map((d) => d.tmdbId)), [dvds])
+  const visibleDvds = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return sortedDvds
+    return sortedDvds.filter(
+      (d) =>
+        d.title.toLowerCase().includes(q) ||
+        (d.originalTitle || '').toLowerCase().includes(q),
+    )
+  }, [sortedDvds, search])
+
+  const existingTmdbIds = useMemo(
+    () => new Set(dvds.map((d) => `${d.mediaType || 'movie'}:${d.tmdbId}`)),
+    [dvds],
+  )
 
   const handleCreate = async (result: TmdbSearchResult, ean: string | null) => {
     const created = await createDvd({ ...result, ean })
@@ -85,7 +99,15 @@ export default function App(): ReactElement {
     <div className="mx-auto max-w-6xl px-3 pb-28 pt-5 sm:px-4 sm:pt-8">
       <header className="mb-6 sm:mb-8">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Emi's DvD Sammlung</h1>
-        <div className="mt-3 flex items-center justify-end gap-2">
+        <div className="mt-3 flex items-center gap-2">
+          <DrawablyInput
+            aria-label="Sammlung durchsuchen"
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={`${dvds.length} ${dvds.length === 1 ? 'Eintrag' : 'Einträge'} suchen`}
+            className="min-w-0 flex-1 !text-xs sm:!text-sm"
+          />
           <DrawablySelect
             aria-label="Sortierung"
             value={sort}
@@ -123,17 +145,21 @@ export default function App(): ReactElement {
         </p>
       )}
 
-      {view === 'grid' ? (
-        <DvdGrid dvds={sortedDvds} onRate={handleRate} onDelete={setDeleteTarget} />
-      ) : dvds.length === 0 ? (
+      {dvds.length === 0 ? (
         <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
           <p className="text-xl font-semibold sm:text-2xl">Noch keine DVDs in deiner Sammlung</p>
           <p className="mt-2 text-sm text-neutral-500 sm:text-base">
             Klicke auf den &bdquo;Erstellen&ldquo;-Button unten rechts, um deinen ersten Film hinzuzuf&uuml;gen.
           </p>
         </div>
+      ) : visibleDvds.length === 0 ? (
+        <p className="py-10 text-center text-sm text-neutral-500">
+          Kein Treffer f&uuml;r &bdquo;{search.trim()}&ldquo;.
+        </p>
+      ) : view === 'grid' ? (
+        <DvdGrid dvds={visibleDvds} onRate={handleRate} onDelete={setDeleteTarget} />
       ) : (
-        <DvdList dvds={sortedDvds} onRate={handleRate} onDelete={setDeleteTarget} />
+        <DvdList dvds={visibleDvds} onRate={handleRate} onDelete={setDeleteTarget} />
       )}
 
       <FabButton onClick={() => setCreateOpen(true)} />
@@ -148,7 +174,7 @@ export default function App(): ReactElement {
 
       {deleteTarget && (
         <ConfirmDialog
-          title="Film löschen?"
+          title={deleteTarget.mediaType === 'tv' ? 'Serie löschen?' : 'Film löschen?'}
           description={`„${deleteTarget.title}“ wird aus deiner DVD-Sammlung entfernt. Diese Aktion kann nicht rückgängig gemacht werden.`}
           loading={deleting}
           onConfirm={handleDeleteConfirm}

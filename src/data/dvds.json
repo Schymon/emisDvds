@@ -42,5 +42,31 @@
     "overview": "",
     "rating": 0,
     "createdAt": "2026-09-28T18:08:22.765Z"
+  },
+  {
+    "id": "79615452-1ef9-4bdc-92f7-61e7444ad758",
+    "tmdbId": 87108,
+    "mediaType": "tv",
+    "ean": null,
+    "title": "Chernobyl",
+    "originalTitle": "Chernobyl",
+    "year": "2019",
+    "posterPath": "/VSo72IlEI8TUI8Z6NWgLcINjWT.jpg",
+    "overview": "Im April 1986 kommt es im ukrainischen Atommeiler Tschernobyl zu einer katastrophalen Kernschmelze. Feuerwehr und Ersthelfer geben alles, um den Unglücksort zu sichern und die Folgen des Ereignisses einzudämmen - doch diese sind weitreichend.",
+    "rating": 5,
+    "createdAt": "2026-10-02T17:15:25.506Z"
+  },
+  {
+    "id": "68df0871-6c0b-46a8-b2a3-c370689af6b4",
+    "tmdbId": 508,
+    "mediaType": "movie",
+    "ean": null,
+    "title": "Tatsächlich... Liebe",
+    "originalTitle": "Love Actually",
+    "year": "2003",
+    "posterPath": "/otWR0kEEMfnBz9C0eXtG7C3R8sv.jpg",
+    "overview": "In der Vorweihnachtszeit schlagen die Gefühlswellen hoch. So verspürt etwa Englands Premier eine unziemliche Zuneigung zu einer Mitarbeiterin, zwei Pornodarsteller müssen ihre Schüchternheit überwinden und ein verstörter Schriftsteller findet erst in der Ferne sein Glück. Eine junge Werberin trifft in Beziehungsdingen immer die falschen Entscheidungen, während eine frischgebackene Ehefrau die Liebe des besten Freundes ihres Mannes entfacht und ein trauriger Witwer die Liebe erst (wieder) lernen muss.",
+    "rating": 0,
+    "createdAt": "2026-10-02T17:15:41.195Z"
   }
 ]

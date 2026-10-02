@@ -1,4 +1,4 @@
-import { Film, Trash2 } from 'lucide-react'
+import { Film, Trash2, Tv } from 'lucide-react'
 import { DrawablyCard } from 'drawably/react'
 import type { ReactElement } from 'react'
 import type { Dvd } from '@/types'
@@ -26,7 +26,15 @@ export function DvdList({ dvds, onRate, onDelete }: DvdListProps): ReactElement 
               )}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold">{dvd.title}</span>
+              <span className="flex items-center gap-2">
+                <span className="min-w-0 break-words text-sm font-semibold">{dvd.title}</span>
+                {dvd.mediaType === 'tv' && (
+                  <span className="flex shrink-0 items-center gap-1 rounded-sm bg-neutral-900/75 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
+                    <Tv size={10} />
+                    Serie
+                  </span>
+                )}
+              </span>
               {dvd.year ? (
                 <span className="block text-xs text-neutral-500">{dvd.year}</span>
               ) : null}

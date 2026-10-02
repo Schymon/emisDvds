@@ -31,7 +31,7 @@ export function Modal({ title, onClose, children }: ModalProps): ReactElement {
     >
       <div
         ref={ref}
-        className="w-full max-w-lg rounded-md border-2 border-neutral-800 bg-[#fdfbf5] p-5 shadow-[6px_6px_0_0_rgba(43,43,43,0.25)]"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-md border-2 border-neutral-800 bg-[#fdfbf5] p-5 shadow-[6px_6px_0_0_rgba(43,43,43,0.25)]"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">{title}</h2>
