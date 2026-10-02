@@ -1,16 +1,5 @@
 [
   {
-    "id": "7ff2c396-6aaa-4e4e-8d49-717a114845ff",
-    "tmdbId": 50546,
-    "title": "Meine erfundene Frau",
-    "originalTitle": "Just Go with It",
-    "year": "2011",
-    "posterPath": "/4vrMkJsORsxZYUSN1V0DIycIBV5.jpg",
-    "overview": "Kurz vor seiner Hochzeit erfährt der junge Arzt Danny Maccabee, dass ihn seine Braut schon mehrmals betrogen hat und ihn nur wegen seiner aussichtsreichen Karriere heiraten will - die Hochzeit platzt. Als sich Danny später in einer Bar betrinken will und dabei seinen Ehering am Finger angesteckt hat, merkt er, dass er mit diesem Ring leichter das Vertrauen von Frauen erwerben kann. In den folgenden Jahren wird genau dies seine Masche: Er spielt den unglücklich verliebten Ehemann, der Trösterinnen findet – für genau eine Nacht. Mehr will er auch gar nicht, da er so nicht von einer Frau enttäuscht werden kann.",
-    "rating": 0,
-    "createdAt": "2026-09-28T17:08:36.855Z"
-  },
-  {
     "id": "aae6b0c0-4928-4651-ae93-347fd57a8655",
     "tmdbId": 1894,
     "title": "Star Wars: Episode II - Angriff der Klonkrieger",
@@ -42,5 +31,16 @@
     "overview": "Die Gefährten haben den Beginn ihrer unerwarteten Reise überstanden – auf ihrem Weg gen Osten begegnen sie nun dem Hautwechsler Beorn und im trügerischen Düsterwald einem Schwarm gigantischer Spinnen. Sie werden von den gefährlichen Waldelben gefangen genommen, können aber entkommen, erreichen Seestadt und schließlich den Einsamen Berg selbst, wo sie sich der größten Gefahr stellen müssen – einem Monster, das alle bisherigen an Grässlichkeit übertrifft: Der Drache Smaug fordert nicht nur den ganzen Mut der Gefährten heraus, sondern stellt auch ihre Freundschaft auf eine harte Probe – bis sie sich schließlich fragen müssen, ob ihre Reise überhaupt noch einen Sinn ergibt.",
     "rating": 0,
     "createdAt": "2026-09-28T17:22:41.231Z"
+  },
+  {
+    "id": "492d8210-efba-4d12-bc0b-bb8c7a469e76",
+    "tmdbId": 603,
+    "ean": "505100300999",
+    "title": "The Matrix",
+    "year": "1999",
+    "posterPath": null,
+    "overview": "",
+    "rating": 0,
+    "createdAt": "2026-09-28T18:08:22.765Z"
   }
 ]

@@ -1,6 +1,7 @@
 export interface Dvd {
   id: string
   tmdbId: number
+  ean?: string | null
   title: string
   originalTitle?: string
   year?: string

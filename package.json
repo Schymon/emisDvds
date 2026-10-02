@@ -12,12 +12,14 @@
     "start": "node dist-server/server.cjs"
   },
   "dependencies": {
+    "@zxing/browser": "^0.2.1",
+    "@zxing/library": "^0.23.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "drawably": "^0.4.2",
     "express": "^4.19.2",
     "fs-extra": "^11.2.0",
     "lucide-react": "^0.454.0",
-    "drawably": "^0.4.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

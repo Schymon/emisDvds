@@ -52,8 +52,8 @@ export default function App(): ReactElement {
 
   const existingTmdbIds = useMemo(() => new Set(dvds.map((d) => d.tmdbId)), [dvds])
 
-  const handleCreate = async (result: TmdbSearchResult) => {
-    const created = await createDvd(result)
+  const handleCreate = async (result: TmdbSearchResult, ean: string | null) => {
+    const created = await createDvd({ ...result, ean })
     setDvds((prev) => [...prev, created])
   }
 

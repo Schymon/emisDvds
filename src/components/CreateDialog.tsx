@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import { Film, Loader2 } from 'lucide-react'
-import { DrawablyButton, DrawablyInput } from 'drawably/react'
+import { DrawablyButton, DrawablyDivider, DrawablyInput } from 'drawably/react'
 import type { ReactElement } from 'react'
 import type { TmdbSearchResult } from '@/types'
-import { searchTmdb, posterUrl } from '@/lib/api'
+import { searchTmdb, lookupUpc, posterUrl } from '@/lib/api'
 import { Modal } from './Modal'
+import { BarcodeScanner } from './BarcodeScanner'
 
 interface CreateDialogProps {
   existingTmdbIds: Set<number>
   onClose: () => void
-  onCreate: (result: TmdbSearchResult) => Promise<void>
+  onCreate: (result: TmdbSearchResult, ean: string | null) => Promise<void>
 }
 
 export function CreateDialog({ existingTmdbIds, onClose, onCreate }: CreateDialogProps): ReactElement {
@@ -18,6 +19,8 @@ export function CreateDialog({ existingTmdbIds, onClose, onCreate }: CreateDialo
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [savingId, setSavingId] = useState<number | null>(null)
+  const [ean, setEan] = useState<string | null>(null)
+  const [scanMsg, setScanMsg] = useState<string | null>(null)
 
   const runSearch = async (value: string) => {
     setQuery(value)
@@ -38,10 +41,57 @@ export function CreateDialog({ existingTmdbIds, onClose, onCreate }: CreateDialo
     }
   }
 
+  const progressiveTmdbSearch = async (rawTitle: string) => {
+    const words = rawTitle.trim().split(/\s+/).slice(0, 6)
+    if (words.length === 0) return
+    setLoading(true)
+    setError(null)
+    try {
+      for (let len = words.length; len >= 1; len--) {
+        const q = words.slice(0, len).join(' ')
+        setQuery(q)
+        setScanMsg(`Suche TMDB mit „${q}“…`)
+        const found = await searchTmdb(q)
+        if (found.length > 0) {
+          setResults(found)
+          setScanMsg(`${found.length} Treffer für „${q}“`)
+          return
+        }
+      }
+      setResults([])
+      setScanMsg('Kein TMDB-Treffer – bitte Titel manuell anpassen.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Suche fehlgeschlagen')
+      setResults([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDetected = async (code: string) => {
+    setEan(code)
+    setScanMsg(`EAN ${code} erkannt – Titel wird bei UPCitemdb gesucht…`)
+    setError(null)
+    try {
+      const title = await lookupUpc(code)
+      if (title) {
+        await progressiveTmdbSearch(title)
+      } else {
+        setScanMsg('Kein Titel über EAN gefunden – bitte Titel manuell eingeben.')
+      }
+    } catch (err) {
+      setScanMsg(
+        err instanceof Error
+          ? `UPCitemdb nicht erreichbar (${err.message}) – bitte Titel manuell eingeben.`
+          : 'UPCitemdb nicht erreichbar – bitte Titel manuell eingeben.',
+      )
+    }
+  }
+
   const handleSelect = async (result: TmdbSearchResult) => {
     setSavingId(result.tmdbId)
     try {
-      await onCreate(result)
+      await onCreate(result, ean)
       onClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erstellen fehlgeschlagen')
@@ -51,9 +101,15 @@ export function CreateDialog({ existingTmdbIds, onClose, onCreate }: CreateDialo
 
   return (
     <Modal title="Neue DVD hinzufügen" onClose={onClose}>
+      <BarcodeScanner onDetected={handleDetected} onError={(msg) => setError(msg)} />
+
+      {scanMsg && <p className="mb-3 text-sm text-neutral-600">{scanMsg}</p>}
+
+      <DrawablyDivider className="my-4" />
+
       <div className="mb-4 flex flex-col gap-2">
         <label htmlFor="movie-search" className="text-sm font-medium">
-          Filmtitel suchen
+          Filmtitel{ean ? ' (ggf. manuell korrigieren)' : ' suchen'}
         </label>
         <DrawablyInput
           id="movie-search"

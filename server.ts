@@ -23,6 +23,7 @@ if (fs.existsSync(DIST_DIR)) {
 interface Dvd {
   id: string
   tmdbId: number
+  ean?: string | null
   title: string
   originalTitle?: string
   year?: string
@@ -62,7 +63,7 @@ app.get('/api/dvds', (_req, res) => {
 })
 
 app.post('/api/dvds', (req, res) => {
-  const { tmdbId, title, originalTitle, year, posterPath, overview } = req.body || {}
+  const { tmdbId, title, originalTitle, year, posterPath, overview, ean } = req.body || {}
   if (!title || tmdbId == null) {
     res.status(400).json({ error: 'title und tmdbId sind erforderlich' })
     return
@@ -72,9 +73,14 @@ app.post('/api/dvds', (req, res) => {
     res.status(409).json({ error: 'Film ist bereits in der Sammlung' })
     return
   }
+  if (ean && dvds.some((d) => d.ean === ean)) {
+    res.status(409).json({ error: 'Diese EAN ist bereits in der Sammlung' })
+    return
+  }
   const dvd: Dvd = {
     id: crypto.randomUUID(),
     tmdbId,
+    ean: ean ? String(ean) : null,
     title,
     originalTitle,
     year,
@@ -114,6 +120,41 @@ app.delete('/api/dvds/:id', (req, res) => {
   }
   saveDvds(next)
   res.json({ ok: true })
+})
+
+function cleanUpcTitle(title: string): string {
+  return title
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+app.get('/api/upc/lookup', async (req, res) => {
+  const code = String(req.query.code || '').trim()
+  if (!/^\d{8,14}$/.test(code)) {
+    res.status(400).json({ error: 'Ungültiger Barcode' })
+    return
+  }
+  try {
+    const response = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`)
+    if (response.status === 404) {
+      res.json({ title: null })
+      return
+    }
+    if (!response.ok && response.status !== 400) {
+      res.status(502).json({ error: `UPCitemdb-Antwort fehlgeschlagen (${response.status})` })
+      return
+    }
+    const data = await response.json()
+    const item = (data.items || [])[0]
+    if (data.code !== 'OK' || !item?.title) {
+      res.json({ title: null })
+      return
+    }
+    res.json({ title: cleanUpcTitle(item.title) })
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'UPCitemdb-Suche fehlgeschlagen' })
+  }
 })
 
 app.get('/api/tmdb/search', async (req, res) => {
